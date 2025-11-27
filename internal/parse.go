@@ -26,13 +26,19 @@ type CountryRecord struct {
 	Country string
 }
 
+// Estimated record counts for slice preallocation (based on typical iptoasn.com data sizes)
+const (
+	estimatedASNRecords     = 700_000
+	estimatedCountryRecords = 700_000
+)
+
 // ParseASNRecords parses ip2asn TSV data from a reader.
 // Format: start_ip	end_ip	asn	country	description
 // Records with ASN 0 ("Not routed") are included so users can distinguish
 // between "IP not in database" and "IP known but not routed".
 func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 	start := time.Now()
-	var records []ASNRecord
+	records := make([]ASNRecord, 0, estimatedASNRecords)
 	scanner := bufio.NewScanner(r)
 	lineNum := 0
 	skipped := 0
@@ -99,7 +105,7 @@ func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 // between "IP not in database" and "IP known but no country assigned".
 func ParseCountryRecords(r io.Reader) ([]CountryRecord, error) {
 	start := time.Now()
-	var records []CountryRecord
+	records := make([]CountryRecord, 0, estimatedCountryRecords)
 	scanner := bufio.NewScanner(r)
 	lineNum := 0
 	skipped := 0
