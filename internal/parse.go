@@ -91,6 +91,13 @@ func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 		return nil, fmt.Errorf("reading input: %w", err)
 	}
 
+	if len(records) == 0 {
+		if skipped > 0 {
+			return nil, fmt.Errorf("no valid records found (%d malformed lines)", skipped)
+		}
+		return nil, fmt.Errorf("no records found in input")
+	}
+
 	fmt.Printf("Parsed %s ASN records in %s", FormatNumber(len(records)), FormatDuration(time.Since(start)))
 	if skipped > 0 {
 		fmt.Printf(" (%d skipped)", skipped)
@@ -147,6 +154,13 @@ func ParseCountryRecords(r io.Reader) ([]CountryRecord, error) {
 
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("reading input: %w", err)
+	}
+
+	if len(records) == 0 {
+		if skipped > 0 {
+			return nil, fmt.Errorf("no valid records found (%d malformed lines)", skipped)
+		}
+		return nil, fmt.Errorf("no records found in input")
 	}
 
 	fmt.Printf("Parsed %s country records in %s", FormatNumber(len(records)), FormatDuration(time.Since(start)))
