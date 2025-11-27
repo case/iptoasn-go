@@ -32,6 +32,12 @@ const (
 	estimatedCountryRecords = 700_000
 )
 
+// Minimum record thresholds - fail if below these counts (likely truncated/corrupt data)
+const (
+	minASNRecords     = 100_000
+	minCountryRecords = 100_000
+)
+
 // ParseASNRecords parses ip2asn TSV data from a reader.
 // Format: start_ip	end_ip	asn	country	description
 // Records with ASN 0 ("Not routed") are included so users can distinguish

@@ -145,15 +145,19 @@ func processSource(writer *mmdbwriter.Tree, src string, cfg Config) error {
 	defer r.Close()
 
 	if cfg.DataType == DataTypeCountry {
-		return processCountryRecords(writer, r)
+		return processCountryRecords(writer, r, cfg.Download)
 	}
-	return processASNRecords(writer, r)
+	return processASNRecords(writer, r, cfg.Download)
 }
 
-func processASNRecords(writer *mmdbwriter.Tree, r io.Reader) error {
+func processASNRecords(writer *mmdbwriter.Tree, r io.Reader, validateMinimum bool) error {
 	records, err := ParseASNRecords(r)
 	if err != nil {
 		return err
+	}
+
+	if validateMinimum && len(records) < minASNRecords {
+		return fmt.Errorf("too few records: got %d, expected at least %d (data may be truncated or corrupt)", len(records), minASNRecords)
 	}
 
 	start := time.Now()
@@ -180,10 +184,14 @@ func processASNRecords(writer *mmdbwriter.Tree, r io.Reader) error {
 	return nil
 }
 
-func processCountryRecords(writer *mmdbwriter.Tree, r io.Reader) error {
+func processCountryRecords(writer *mmdbwriter.Tree, r io.Reader, validateMinimum bool) error {
 	records, err := ParseCountryRecords(r)
 	if err != nil {
 		return err
+	}
+
+	if validateMinimum && len(records) < minCountryRecords {
+		return fmt.Errorf("too few records: got %d, expected at least %d (data may be truncated or corrupt)", len(records), minCountryRecords)
 	}
 
 	start := time.Now()
