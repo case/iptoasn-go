@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -118,8 +119,8 @@ func Build(cfg Config) error {
 		return fmt.Errorf("renaming temp file: %w", err)
 	}
 
-	fmt.Printf("Wrote %s (%s) in %s\n", FormatFile(cfg.OutputFile), FormatMB(written), FormatDuration(time.Since(start)))
-	fmt.Printf("Total time: %s\n", FormatDuration(time.Since(totalStart)))
+	slog.Info("Wrote MMDB", "file", cfg.OutputFile, "size_mb", fmt.Sprintf("%.1f", float64(written)/(1024*1024)), "duration", time.Since(start).Round(time.Millisecond))
+	slog.Info("Build complete", "total_duration", time.Since(totalStart).Round(time.Millisecond))
 	return nil
 }
 
@@ -183,7 +184,7 @@ func processASNRecords(writer *mmdbwriter.Tree, r io.Reader, validateMinimum boo
 		}
 	}
 
-	fmt.Printf("Inserted %s prefixes in %s\n", FormatNumber(inserted), FormatDuration(time.Since(start)))
+	slog.Info("Inserted prefixes", "count", inserted, "duration", time.Since(start).Round(time.Millisecond))
 	return nil
 }
 
@@ -218,6 +219,6 @@ func processCountryRecords(writer *mmdbwriter.Tree, r io.Reader, validateMinimum
 		}
 	}
 
-	fmt.Printf("Inserted %s prefixes in %s\n", FormatNumber(inserted), FormatDuration(time.Since(start)))
+	slog.Info("Inserted prefixes", "count", inserted, "duration", time.Since(start).Round(time.Millisecond))
 	return nil
 }

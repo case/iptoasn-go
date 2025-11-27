@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/netip"
 	"strconv"
 	"strings"
@@ -58,28 +59,28 @@ func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 
 		fields := strings.Split(line, "\t")
 		if len(fields) < 5 {
-			fmt.Printf("Warning: line %d: expected 5 fields, got %d\n", lineNum, len(fields))
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "expected 5 fields", "got", len(fields))
 			skipped++
 			continue
 		}
 
 		startIP, err := netip.ParseAddr(fields[0])
 		if err != nil {
-			fmt.Printf("Warning: line %d: invalid start IP %q: %v\n", lineNum, fields[0], err)
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "invalid start IP", "value", fields[0])
 			skipped++
 			continue
 		}
 
 		endIP, err := netip.ParseAddr(fields[1])
 		if err != nil {
-			fmt.Printf("Warning: line %d: invalid end IP %q: %v\n", lineNum, fields[1], err)
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "invalid end IP", "value", fields[1])
 			skipped++
 			continue
 		}
 
 		asn, err := strconv.ParseUint(fields[2], 10, 32)
 		if err != nil {
-			fmt.Printf("Warning: line %d: invalid ASN %q: %v\n", lineNum, fields[2], err)
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "invalid ASN", "value", fields[2])
 			skipped++
 			continue
 		}
@@ -104,11 +105,7 @@ func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 		return nil, fmt.Errorf("no records found in input")
 	}
 
-	fmt.Printf("Parsed %s ASN records in %s", FormatNumber(len(records)), FormatDuration(time.Since(start)))
-	if skipped > 0 {
-		fmt.Printf(" (%d skipped)", skipped)
-	}
-	fmt.Println()
+	slog.Info("Parsed ASN records", "count", len(records), "skipped", skipped, "duration", time.Since(start).Round(time.Millisecond))
 	return records, nil
 }
 
@@ -132,21 +129,21 @@ func ParseCountryRecords(r io.Reader) ([]CountryRecord, error) {
 
 		fields := strings.Split(line, "\t")
 		if len(fields) < 3 {
-			fmt.Printf("Warning: line %d: expected 3 fields, got %d\n", lineNum, len(fields))
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "expected 3 fields", "got", len(fields))
 			skipped++
 			continue
 		}
 
 		startIP, err := netip.ParseAddr(fields[0])
 		if err != nil {
-			fmt.Printf("Warning: line %d: invalid start IP %q: %v\n", lineNum, fields[0], err)
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "invalid start IP", "value", fields[0])
 			skipped++
 			continue
 		}
 
 		endIP, err := netip.ParseAddr(fields[1])
 		if err != nil {
-			fmt.Printf("Warning: line %d: invalid end IP %q: %v\n", lineNum, fields[1], err)
+			slog.Warn("Skipping malformed line", "line", lineNum, "error", "invalid end IP", "value", fields[1])
 			skipped++
 			continue
 		}
@@ -169,10 +166,6 @@ func ParseCountryRecords(r io.Reader) ([]CountryRecord, error) {
 		return nil, fmt.Errorf("no records found in input")
 	}
 
-	fmt.Printf("Parsed %s country records in %s", FormatNumber(len(records)), FormatDuration(time.Since(start)))
-	if skipped > 0 {
-		fmt.Printf(" (%d skipped)", skipped)
-	}
-	fmt.Println()
+	slog.Info("Parsed country records", "count", len(records), "skipped", skipped, "duration", time.Since(start).Round(time.Millisecond))
 	return records, nil
 }

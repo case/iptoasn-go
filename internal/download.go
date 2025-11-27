@@ -5,13 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 )
 
 const baseURL = "https://iptoasn.com/data"
+
+// joinURL joins a base URL with path elements.
+func joinURL(base string, elem ...string) string {
+	u, _ := url.JoinPath(base, elem...)
+	return u
+}
 
 // Supported source filenames from iptoasn.com.
 const (
@@ -27,43 +35,43 @@ func (c Config) SourceURLs() []string {
 	if c.DataType == DataTypeCountry {
 		switch c.IPVersion {
 		case IPVersion4:
-			return []string{baseURL + "/" + FileCountry4}
+			return []string{joinURL(baseURL, FileCountry4)}
 		case IPVersion6:
-			return []string{baseURL + "/" + FileCountry6}
+			return []string{joinURL(baseURL, FileCountry6)}
 		default:
-			return []string{baseURL + "/" + FileCountry4, baseURL + "/" + FileCountry6}
+			return []string{joinURL(baseURL, FileCountry4), joinURL(baseURL, FileCountry6)}
 		}
 	}
 
 	// ASN data
 	switch c.IPVersion {
 	case IPVersion4:
-		return []string{baseURL + "/" + FileASN4}
+		return []string{joinURL(baseURL, FileASN4)}
 	case IPVersion6:
-		return []string{baseURL + "/" + FileASN6}
+		return []string{joinURL(baseURL, FileASN6)}
 	default:
-		return []string{baseURL + "/" + FileASNCombined}
+		return []string{joinURL(baseURL, FileASNCombined)}
 	}
 }
 
 // Download fetches a URL and returns a reader for the uncompressed content.
 // The caller is responsible for closing the returned ReadCloser.
-func Download(url string) (io.ReadCloser, error) {
-	fmt.Printf("Downloading %s\n", url)
+func Download(urlStr string) (io.ReadCloser, error) {
+	slog.Info("Downloading", "url", urlStr)
 
 	start := time.Now()
-	resp, err := http.Get(url)
+	resp, err := http.Get(urlStr)
 	if err != nil {
-		return nil, fmt.Errorf("downloading %s: %w", url, err)
+		return nil, fmt.Errorf("downloading %s: %w", urlStr, err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return nil, fmt.Errorf("downloading %s: status %d", url, resp.StatusCode)
+		return nil, fmt.Errorf("downloading %s: status %d", urlStr, resp.StatusCode)
 	}
 
 	// Validate Content-Type for gzip downloads
-	if strings.HasSuffix(url, ".gz") {
+	if strings.HasSuffix(urlStr, ".gz") {
 		contentType := resp.Header.Get("Content-Type")
 		validTypes := []string{"application/gzip", "application/x-gzip", "application/octet-stream", "application/binary"}
 		valid := false
@@ -75,18 +83,18 @@ func Download(url string) (io.ReadCloser, error) {
 		}
 		if !valid {
 			resp.Body.Close()
-			return nil, fmt.Errorf("downloading %s: unexpected content type %q (expected gzip)", url, contentType)
+			return nil, fmt.Errorf("downloading %s: unexpected content type %q (expected gzip)", urlStr, contentType)
 		}
 	}
 
 	size := resp.ContentLength
 	if size > 0 {
-		fmt.Printf("Downloaded %s in %s\n", FormatMB(size), FormatDuration(time.Since(start)))
+		slog.Info("Downloaded", "size_mb", fmt.Sprintf("%.1f", float64(size)/(1024*1024)), "duration", time.Since(start).Round(time.Millisecond))
 	} else {
-		fmt.Printf("Downloaded in %s\n", FormatDuration(time.Since(start)))
+		slog.Info("Downloaded", "duration", time.Since(start).Round(time.Millisecond))
 	}
 
-	if strings.HasSuffix(url, ".gz") {
+	if strings.HasSuffix(urlStr, ".gz") {
 		gr, err := gzip.NewReader(resp.Body)
 		if err != nil {
 			resp.Body.Close()
@@ -101,7 +109,7 @@ func Download(url string) (io.ReadCloser, error) {
 // OpenFile opens a local file and returns a reader for the uncompressed content.
 // The caller is responsible for closing the returned ReadCloser.
 func OpenFile(path string) (io.ReadCloser, error) {
-	fmt.Printf("Reading %s\n", path)
+	slog.Info("Reading", "path", path)
 
 	f, err := os.Open(path)
 	if err != nil {
