@@ -2,6 +2,7 @@ package internal
 
 import (
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -109,10 +110,5 @@ type gzipReadCloser struct {
 }
 
 func (g *gzipReadCloser) Close() error {
-	err := g.Reader.Close()
-	err2 := g.underlying.Close()
-	if err != nil {
-		return err
-	}
-	return err2
+	return errors.Join(g.Reader.Close(), g.underlying.Close())
 }
