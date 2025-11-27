@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/maxmind/mmdbwriter"
@@ -90,15 +91,31 @@ func Build(cfg Config) error {
 	}
 
 	start := time.Now()
-	f, err := os.Create(cfg.OutputFile)
-	if err != nil {
-		return fmt.Errorf("creating output file: %w", err)
-	}
-	defer f.Close()
 
-	written, err := writer.WriteTo(f)
+	// Write to temp file first for atomic replacement
+	dir := filepath.Dir(cfg.OutputFile)
+	tmpFile, err := os.CreateTemp(dir, ".iptoasn-*.mmdb.tmp")
 	if err != nil {
-		return fmt.Errorf("writing mmdb: %w", err)
+		return fmt.Errorf("creating temp file: %w", err)
+	}
+	tmpPath := tmpFile.Name()
+
+	written, writeErr := writer.WriteTo(tmpFile)
+	closeErr := tmpFile.Close()
+
+	if writeErr != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("writing mmdb: %w", writeErr)
+	}
+	if closeErr != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("closing temp file: %w", closeErr)
+	}
+
+	// Atomic rename
+	if err := os.Rename(tmpPath, cfg.OutputFile); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("renaming temp file: %w", err)
 	}
 
 	fmt.Printf("Wrote %s (%s) in %s\n", FormatFile(cfg.OutputFile), FormatMB(written), FormatDuration(time.Since(start)))
