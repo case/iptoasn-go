@@ -1,9 +1,42 @@
 package internal
 
 import (
+	"fmt"
 	"net"
 	"net/netip"
+	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
+
+// ANSI color codes
+const (
+	colorCyan  = "\033[36m"
+	colorReset = "\033[0m"
+)
+
+// FormatNumber returns a number formatted with commas.
+func FormatNumber(n int) string {
+	p := message.NewPrinter(language.English)
+	return p.Sprintf("%d", n)
+}
+
+// FormatDuration returns a colored duration string.
+func FormatDuration(d time.Duration) string {
+	return fmt.Sprintf("%s%s%s", colorCyan, d.Round(time.Millisecond), colorReset)
+}
+
+// FormatFile returns a colored filename string.
+func FormatFile(name string) string {
+	return fmt.Sprintf("%s%s%s", colorCyan, name, colorReset)
+}
+
+// FormatMB returns bytes formatted as MB with one decimal place.
+func FormatMB(bytes int64) string {
+	mb := float64(bytes) / (1024 * 1024)
+	return fmt.Sprintf("%.1f MB", mb)
+}
 
 // ipRangeToPrefixes converts an IP range to a list of CIDR prefixes that
 // exactly cover the range.

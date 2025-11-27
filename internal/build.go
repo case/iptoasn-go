@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/maxmind/mmdbwriter"
 	"github.com/maxmind/mmdbwriter/mmdbtype"
@@ -57,6 +58,8 @@ func (c Config) Validate() error {
 
 // Build downloads data (if needed) and creates the MMDB file.
 func Build(cfg Config) error {
+	totalStart := time.Now()
+
 	ipVersion := 6 // Default to IPv6 (supports both v4 and v6)
 	if cfg.IPVersion == IPVersion4 {
 		ipVersion = 4
@@ -86,17 +89,20 @@ func Build(cfg Config) error {
 		}
 	}
 
+	start := time.Now()
 	f, err := os.Create(cfg.OutputFile)
 	if err != nil {
 		return fmt.Errorf("creating output file: %w", err)
 	}
 	defer f.Close()
 
-	if _, err := writer.WriteTo(f); err != nil {
+	written, err := writer.WriteTo(f)
+	if err != nil {
 		return fmt.Errorf("writing mmdb: %w", err)
 	}
 
-	fmt.Printf("wrote %s\n", cfg.OutputFile)
+	fmt.Printf("Wrote %s (%s) in %s\n", FormatFile(cfg.OutputFile), FormatMB(written), FormatDuration(time.Since(start)))
+	fmt.Printf("Total time: %s\n", FormatDuration(time.Since(totalStart)))
 	return nil
 }
 
@@ -133,6 +139,7 @@ func processASNRecords(writer *mmdbwriter.Tree, r io.Reader) error {
 		return err
 	}
 
+	start := time.Now()
 	inserted := 0
 	for _, rec := range records {
 		prefixes := ipRangeToPrefixes(rec.StartIP, rec.EndIP)
@@ -152,7 +159,7 @@ func processASNRecords(writer *mmdbwriter.Tree, r io.Reader) error {
 		}
 	}
 
-	fmt.Printf("inserted %d prefixes\n", inserted)
+	fmt.Printf("Inserted %s prefixes in %s\n", FormatNumber(inserted), FormatDuration(time.Since(start)))
 	return nil
 }
 
@@ -162,6 +169,7 @@ func processCountryRecords(writer *mmdbwriter.Tree, r io.Reader) error {
 		return err
 	}
 
+	start := time.Now()
 	inserted := 0
 	for _, rec := range records {
 		prefixes := ipRangeToPrefixes(rec.StartIP, rec.EndIP)
@@ -179,6 +187,6 @@ func processCountryRecords(writer *mmdbwriter.Tree, r io.Reader) error {
 		}
 	}
 
-	fmt.Printf("inserted %d prefixes\n", inserted)
+	fmt.Printf("Inserted %s prefixes in %s\n", FormatNumber(inserted), FormatDuration(time.Since(start)))
 	return nil
 }

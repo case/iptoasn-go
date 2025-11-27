@@ -7,6 +7,7 @@ import (
 	"net/netip"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ASNRecord represents a parsed line from ip2asn files.
@@ -30,6 +31,7 @@ type CountryRecord struct {
 // Records with ASN 0 ("Not routed") are included so users can distinguish
 // between "IP not in database" and "IP known but not routed".
 func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
+	start := time.Now()
 	var records []ASNRecord
 	scanner := bufio.NewScanner(r)
 
@@ -72,7 +74,7 @@ func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 		return nil, fmt.Errorf("reading input: %w", err)
 	}
 
-	fmt.Printf("parsed %d ASN records\n", len(records))
+	fmt.Printf("Parsed %s ASN records in %s\n", FormatNumber(len(records)), FormatDuration(time.Since(start)))
 	return records, nil
 }
 
@@ -81,6 +83,7 @@ func ParseASNRecords(r io.Reader) ([]ASNRecord, error) {
 // Records with country "None" are included so users can distinguish
 // between "IP not in database" and "IP known but no country assigned".
 func ParseCountryRecords(r io.Reader) ([]CountryRecord, error) {
+	start := time.Now()
 	var records []CountryRecord
 	scanner := bufio.NewScanner(r)
 
@@ -116,6 +119,6 @@ func ParseCountryRecords(r io.Reader) ([]CountryRecord, error) {
 		return nil, fmt.Errorf("reading input: %w", err)
 	}
 
-	fmt.Printf("parsed %d country records\n", len(records))
+	fmt.Printf("Parsed %s country records in %s\n", FormatNumber(len(records)), FormatDuration(time.Since(start)))
 	return records, nil
 }

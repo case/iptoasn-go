@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 const baseURL = "https://iptoasn.com/data"
@@ -47,8 +48,9 @@ func (c Config) SourceURLs() []string {
 // Download fetches a URL and returns a reader for the uncompressed content.
 // The caller is responsible for closing the returned ReadCloser.
 func Download(url string) (io.ReadCloser, error) {
-	fmt.Printf("downloading %s\n", url)
+	fmt.Printf("Downloading %s\n", url)
 
+	start := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("downloading %s: %w", url, err)
@@ -57,6 +59,13 @@ func Download(url string) (io.ReadCloser, error) {
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
 		return nil, fmt.Errorf("downloading %s: status %d", url, resp.StatusCode)
+	}
+
+	size := resp.ContentLength
+	if size > 0 {
+		fmt.Printf("Downloaded %s in %s\n", FormatMB(size), FormatDuration(time.Since(start)))
+	} else {
+		fmt.Printf("Downloaded in %s\n", FormatDuration(time.Since(start)))
 	}
 
 	if strings.HasSuffix(url, ".gz") {
@@ -74,7 +83,7 @@ func Download(url string) (io.ReadCloser, error) {
 // OpenFile opens a local file and returns a reader for the uncompressed content.
 // The caller is responsible for closing the returned ReadCloser.
 func OpenFile(path string) (io.ReadCloser, error) {
-	fmt.Printf("reading %s\n", path)
+	fmt.Printf("Reading %s\n", path)
 
 	f, err := os.Open(path)
 	if err != nil {
