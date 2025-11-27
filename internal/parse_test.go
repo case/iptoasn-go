@@ -140,3 +140,29 @@ func TestParseASNRecords_MalformedLines(t *testing.T) {
 		t.Fatalf("expected 2 records (skipping malformed), got %d", len(records))
 	}
 }
+
+func TestParseASNRecords_AllMalformed(t *testing.T) {
+	// Test that all malformed input returns an error
+	input := "malformed line 1\nmalformed line 2\n"
+
+	_, err := ParseASNRecords(strings.NewReader(input))
+	if err == nil {
+		t.Fatal("expected error for all malformed input, got nil")
+	}
+	if !strings.Contains(err.Error(), "no valid records found") {
+		t.Errorf("expected 'no valid records found' error, got: %v", err)
+	}
+}
+
+func TestParseASNRecords_EmptyInput(t *testing.T) {
+	// Test that empty input returns an error
+	input := ""
+
+	_, err := ParseASNRecords(strings.NewReader(input))
+	if err == nil {
+		t.Fatal("expected error for empty input, got nil")
+	}
+	if !strings.Contains(err.Error(), "no records found") {
+		t.Errorf("expected 'no records found' error, got: %v", err)
+	}
+}
