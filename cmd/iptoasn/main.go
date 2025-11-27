@@ -24,11 +24,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Flags:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
-		fmt.Fprintf(os.Stderr, "  iptoasn --download -o iptoasn.mmdb\n")
-		fmt.Fprintf(os.Stderr, "  iptoasn --download --type country -o country.mmdb\n")
-		fmt.Fprintf(os.Stderr, "  iptoasn --download --ip-version 4 -o iptoasn-v4.mmdb\n")
-		fmt.Fprintf(os.Stderr, "  iptoasn --download --ip-version 6 -o iptoasn-v6.mmdb\n")
-		fmt.Fprintf(os.Stderr, "  iptoasn --source ip2asn-combined.tsv.gz -o iptoasn.mmdb\n")
+		fmt.Fprintf(os.Stderr, "  iptoasn -download -o iptoasn.mmdb\n")
+		fmt.Fprintf(os.Stderr, "  iptoasn -download -type country -o country.mmdb\n")
+		fmt.Fprintf(os.Stderr, "  iptoasn -download -ip-version 4 -o iptoasn-v4.mmdb\n")
+		fmt.Fprintf(os.Stderr, "  iptoasn -download -ip-version 6 -o iptoasn-v6.mmdb\n")
+		fmt.Fprintf(os.Stderr, "  iptoasn -source ip2asn-combined.tsv.gz -o iptoasn.mmdb\n")
 	}
 	flag.Parse()
 
