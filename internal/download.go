@@ -65,7 +65,7 @@ func Download(url string) (io.ReadCloser, error) {
 	// Validate Content-Type for gzip downloads
 	if strings.HasSuffix(url, ".gz") {
 		contentType := resp.Header.Get("Content-Type")
-		validTypes := []string{"application/gzip", "application/x-gzip", "application/octet-stream"}
+		validTypes := []string{"application/gzip", "application/x-gzip", "application/octet-stream", "application/binary"}
 		valid := false
 		for _, t := range validTypes {
 			if strings.HasPrefix(contentType, t) {
