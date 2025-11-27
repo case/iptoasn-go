@@ -163,7 +163,10 @@ func processASNRecords(writer *mmdbwriter.Tree, r io.Reader, validateMinimum boo
 	start := time.Now()
 	inserted := 0
 	for _, rec := range records {
-		prefixes := ipRangeToPrefixes(rec.StartIP, rec.EndIP)
+		prefixes, err := ipRangeToPrefixes(rec.StartIP, rec.EndIP)
+		if err != nil {
+			return fmt.Errorf("converting range to prefixes: %w", err)
+		}
 		record := mmdbtype.Map{
 			"autonomous_system_number":       mmdbtype.Uint32(rec.ASN),
 			"autonomous_system_organization": mmdbtype.String(rec.Organization),
@@ -197,7 +200,10 @@ func processCountryRecords(writer *mmdbwriter.Tree, r io.Reader, validateMinimum
 	start := time.Now()
 	inserted := 0
 	for _, rec := range records {
-		prefixes := ipRangeToPrefixes(rec.StartIP, rec.EndIP)
+		prefixes, err := ipRangeToPrefixes(rec.StartIP, rec.EndIP)
+		if err != nil {
+			return fmt.Errorf("converting range to prefixes: %w", err)
+		}
 		record := mmdbtype.Map{
 			"country": mmdbtype.Map{
 				"iso_code": mmdbtype.String(rec.Country),

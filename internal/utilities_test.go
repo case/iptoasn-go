@@ -2,6 +2,7 @@ package internal
 
 import (
 	"net/netip"
+	"strings"
 	"testing"
 )
 
@@ -9,7 +10,10 @@ func TestIpRangeToPrefixes_SingleIP(t *testing.T) {
 	start := netip.MustParseAddr("1.0.0.0")
 	end := netip.MustParseAddr("1.0.0.0")
 
-	prefixes := ipRangeToPrefixes(start, end)
+	prefixes, err := ipRangeToPrefixes(start, end)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(prefixes) != 1 {
 		t.Fatalf("expected 1 prefix, got %d", len(prefixes))
@@ -24,7 +28,10 @@ func TestIpRangeToPrefixes_SinglePrefix(t *testing.T) {
 	start := netip.MustParseAddr("1.0.0.0")
 	end := netip.MustParseAddr("1.0.0.255")
 
-	prefixes := ipRangeToPrefixes(start, end)
+	prefixes, err := ipRangeToPrefixes(start, end)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(prefixes) != 1 {
 		t.Fatalf("expected 1 prefix, got %d: %v", len(prefixes), prefixes)
@@ -40,7 +47,10 @@ func TestIpRangeToPrefixes_MultiplePrefixes(t *testing.T) {
 	start := netip.MustParseAddr("1.0.1.0")
 	end := netip.MustParseAddr("1.0.3.255")
 
-	prefixes := ipRangeToPrefixes(start, end)
+	prefixes, err := ipRangeToPrefixes(start, end)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(prefixes) != 2 {
 		t.Fatalf("expected 2 prefixes, got %d: %v", len(prefixes), prefixes)
@@ -57,13 +67,30 @@ func TestIpRangeToPrefixes_IPv6(t *testing.T) {
 	start := netip.MustParseAddr("2001:4:112::")
 	end := netip.MustParseAddr("2001:4:112:ffff:ffff:ffff:ffff:ffff")
 
-	prefixes := ipRangeToPrefixes(start, end)
+	prefixes, err := ipRangeToPrefixes(start, end)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(prefixes) != 1 {
 		t.Fatalf("expected 1 prefix, got %d: %v", len(prefixes), prefixes)
 	}
 	if prefixes[0].String() != "2001:4:112::/48" {
 		t.Errorf("expected 2001:4:112::/48, got %s", prefixes[0])
+	}
+}
+
+func TestIpRangeToPrefixes_InvalidRange(t *testing.T) {
+	// Test that start > end returns an error
+	start := netip.MustParseAddr("8.8.8.255")
+	end := netip.MustParseAddr("8.8.8.0")
+
+	_, err := ipRangeToPrefixes(start, end)
+	if err == nil {
+		t.Fatal("expected error for invalid range (start > end), got nil")
+	}
+	if !strings.Contains(err.Error(), "invalid IP range") {
+		t.Errorf("expected 'invalid IP range' error, got: %v", err)
 	}
 }
 

@@ -40,7 +40,11 @@ func FormatMB(bytes int64) string {
 
 // ipRangeToPrefixes converts an IP range to a list of CIDR prefixes that
 // exactly cover the range.
-func ipRangeToPrefixes(start, end netip.Addr) []netip.Prefix {
+func ipRangeToPrefixes(start, end netip.Addr) ([]netip.Prefix, error) {
+	if start.Compare(end) > 0 {
+		return nil, fmt.Errorf("invalid IP range: start %s > end %s", start, end)
+	}
+
 	var prefixes []netip.Prefix
 
 	for start.Compare(end) <= 0 {
@@ -73,7 +77,7 @@ func ipRangeToPrefixes(start, end netip.Addr) []netip.Prefix {
 		start = next
 	}
 
-	return prefixes
+	return prefixes, nil
 }
 
 // lastAddr returns the last address in a prefix.
