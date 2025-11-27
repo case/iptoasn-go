@@ -4,7 +4,9 @@ This is a utility for efficiently using the [iptoasn.com GeoIP data](https://ipt
 
 ## Usage
 
-- Installation - `go install github.com/case/iptoasn-go/cmd/iptoasn`
+1. Installation - `go install github.com/case/iptoasn-go/cmd/iptoasn@v1.0.0`
+2. Usage - `iptoasn --download -o iptoasn.mmdb` - downloads and converts the default `ip2asn-combined.tsv.gz` file
+3. Use the resulting `.mmdb` file in your Go programs, via the [`oschwald/geoip2-golang`](https://github.com/oschwald/geoip2-golang) library
 
 ## Misc
 
