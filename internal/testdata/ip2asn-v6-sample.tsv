@@ -1,0 +1,4 @@
+2001::	2001::ffff:ffff:ffff:ffff:ffff	0	None	Not routed
+2001:4:112::	2001:4:112:ffff:ffff:ffff:ffff:ffff	112	US	AS112-PROJECT
+2001:200::	2001:200:5ff:ffff:ffff:ffff:ffff:ffff	0	None	Not routed
+2606:4700::	2606:4700:ffff:ffff:ffff:ffff:ffff:ffff	13335	US	CLOUDFLARENET
