@@ -62,6 +62,23 @@ func Download(url string) (io.ReadCloser, error) {
 		return nil, fmt.Errorf("downloading %s: status %d", url, resp.StatusCode)
 	}
 
+	// Validate Content-Type for gzip downloads
+	if strings.HasSuffix(url, ".gz") {
+		contentType := resp.Header.Get("Content-Type")
+		validTypes := []string{"application/gzip", "application/x-gzip", "application/octet-stream"}
+		valid := false
+		for _, t := range validTypes {
+			if strings.HasPrefix(contentType, t) {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			resp.Body.Close()
+			return nil, fmt.Errorf("downloading %s: unexpected content type %q (expected gzip)", url, contentType)
+		}
+	}
+
 	size := resp.ContentLength
 	if size > 0 {
 		fmt.Printf("Downloaded %s in %s\n", FormatMB(size), FormatDuration(time.Since(start)))
