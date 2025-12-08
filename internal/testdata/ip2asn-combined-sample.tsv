@@ -9,6 +9,8 @@
 1.0.140.0	1.0.180.255	23969	TH	TOT-NET TOT Public Company Limited
 1.0.181.0	1.0.182.255	23969	TH	TOT-NET TOT Public Company Limited
 1.0.183.0	1.0.195.255	23969	TH	TOT-NET TOT Public Company Limited
+1.179.112.0	1.179.119.255	396982	US	GOOGLE-CLOUD-PLATFORM
+2c0f:fb50::	2c0f:fb50:ffff:ffff:ffff:ffff:ffff:ffff	15169	US	GOOGLE
 2c0f:ff90::	2c0f:ff90:ffff:ffff:ffff:ffff:ffff:ffff	15808	KE	ACCESSKENYA-KE ACCESSKENYA GROUP LTD is an ISP serving
 2c0f:ff91::	2c0f:ff97:ffff:ffff:ffff:ffff:ffff:ffff	0	None	Not routed
 2c0f:ff98::	2c0f:ff98:ffff:ffff:ffff:ffff:ffff:ffff	37113	UG	tangerine-ug-as
