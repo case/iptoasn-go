@@ -119,7 +119,7 @@ func TestBuild_WithReservedNetworks(t *testing.T) {
 		OutputFile: outputFile,
 		DataType:   DataTypeASN,
 		IPVersion:  IPVersion4,
-		SourceFile: "testdata/ip2asn-sample.tsv",
+		SourceFile: "testdata/ip2asn-combined-sample.tsv",
 	}
 
 	err := Build(cfg)
@@ -188,4 +188,3 @@ func TestBuild_CountryData(t *testing.T) {
 		t.Error("output file is empty")
 	}
 }
-

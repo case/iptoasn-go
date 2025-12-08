@@ -7,7 +7,7 @@ import (
 )
 
 func TestParseASNRecords(t *testing.T) {
-	f, err := os.Open("testdata/ip2asn-sample.tsv")
+	f, err := os.Open("testdata/ip2asn-combined-sample.tsv")
 	if err != nil {
 		t.Fatalf("failed to open test file: %v", err)
 	}
@@ -18,12 +18,12 @@ func TestParseASNRecords(t *testing.T) {
 		t.Fatalf("ParseASNRecords failed: %v", err)
 	}
 
-	// Should have 6 records (including ASN 0 entries for reserved networks)
-	if len(records) != 6 {
-		t.Fatalf("expected 6 records, got %d", len(records))
+	// Should have 35 records (12 IPv4 + 23 IPv6, including ASN 0 entries for reserved networks)
+	if len(records) != 35 {
+		t.Fatalf("expected 35 records, got %d", len(records))
 	}
 
-	// Check first record (Cloudflare)
+	// Check first record (Cloudflare IPv4)
 	if records[0].ASN != 13335 {
 		t.Errorf("expected ASN 13335, got %d", records[0].ASN)
 	}
@@ -33,15 +33,21 @@ func TestParseASNRecords(t *testing.T) {
 	if records[0].Organization != "CLOUDFLARENET" {
 		t.Errorf("expected org CLOUDFLARENET, got %s", records[0].Organization)
 	}
+	if !records[0].StartIP.Is4() {
+		t.Error("expected IPv4 address for first record")
+	}
 
 	// Check that ASN 0 entries are included
 	if records[1].ASN != 0 {
 		t.Errorf("expected ASN 0 for not-routed entry, got %d", records[1].ASN)
 	}
 
-	// Check Google entry
-	if records[3].ASN != 15169 {
-		t.Errorf("expected ASN 15169 for Google, got %d", records[3].ASN)
+	// Check Google IPv6 entry (2c0f:fb50::/32)
+	if records[12].ASN != 15169 {
+		t.Errorf("expected ASN 15169 for Google IPv6, got %d", records[12].ASN)
+	}
+	if !records[12].StartIP.Is6() {
+		t.Error("expected IPv6 address for Google entry")
 	}
 }
 

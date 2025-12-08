@@ -99,7 +99,7 @@ func TestSourceURLs_Country(t *testing.T) {
 }
 
 func TestOpenFile(t *testing.T) {
-	r, err := OpenFile("testdata/ip2asn-sample.tsv")
+	r, err := OpenFile("testdata/ip2asn-combined-sample.tsv")
 	if err != nil {
 		t.Fatalf("OpenFile failed: %v", err)
 	}
