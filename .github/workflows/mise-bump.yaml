@@ -51,7 +51,7 @@ jobs:
           git push --force origin "$BRANCH"
           if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
             gh pr create --head "$BRANCH" --title "Bump mise tools" \
-              --body "$(git diff HEAD~1 -- mise.toml | sed -n 's/^[-+][a-z]/&/p')"
+              --body "$(printf '~~~diff\n%s\n~~~\n' "$(git diff HEAD~1 -- mise.toml)")"
           fi
           # Token-made PR runs wait for approval; a dispatch runs Tests without it.
           gh workflow run tests.yaml --ref "$BRANCH"
