@@ -1,11 +1,8 @@
 module github.com/case/iptoasn-go
 
-go 1.24.0
+go 1.25.0
 
-require (
-	github.com/maxmind/mmdbwriter v1.1.0
-	golang.org/x/text v0.31.0
-)
+require github.com/maxmind/mmdbwriter v1.1.0
 
 require (
 	github.com/oschwald/maxminddb-golang/v2 v2.0.0-beta.10 // indirect
