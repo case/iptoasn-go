@@ -11,7 +11,7 @@ func TestParseASNRecords(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open test file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	records, err := ParseASNRecords(f)
 	if err != nil {
@@ -56,7 +56,7 @@ func TestParseASNRecords_IPv6(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open test file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	records, err := ParseASNRecords(f)
 	if err != nil {
@@ -91,7 +91,7 @@ func TestParseCountryRecords(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open test file: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	records, err := ParseCountryRecords(f)
 	if err != nil {

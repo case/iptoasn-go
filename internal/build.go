@@ -105,17 +105,17 @@ func Build(cfg Config) error {
 	closeErr := tmpFile.Close()
 
 	if writeErr != nil {
-		os.Remove(tmpPath)
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("writing mmdb: %w", writeErr)
 	}
 	if closeErr != nil {
-		os.Remove(tmpPath)
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("closing temp file: %w", closeErr)
 	}
 
 	// Atomic rename
 	if err := os.Rename(tmpPath, cfg.OutputFile); err != nil {
-		os.Remove(tmpPath)
+		_ = os.Remove(tmpPath)
 		return fmt.Errorf("renaming temp file: %w", err)
 	}
 
@@ -143,7 +143,7 @@ func processSource(writer *mmdbwriter.Tree, src string, cfg Config) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	if cfg.DataType == DataTypeCountry {
 		return processCountryRecords(writer, r, cfg.Download)

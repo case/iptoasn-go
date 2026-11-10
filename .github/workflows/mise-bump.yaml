@@ -1,0 +1,57 @@
+name: Bump mise tools
+
+on:
+  workflow_dispatch: # Enables the web UI manual trigger
+  schedule:
+    - cron: "0 13 * * 1" # Mondays 5am Pacific, alongside Dependabot
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  BRANCH: mise-bump
+
+jobs:
+  bump:
+    name: Bump mise.toml
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      actions: write # dispatch Tests on the bump branch
+      contents: write # push the bump branch
+      pull-requests: write # open the PR
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install mise
+        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
+        with:
+          install: false
+
+      - name: Bump tool versions released at least 7 days ago
+        run: mise upgrade --bump --minimum-release-age 7d
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- mise.toml; then
+            echo "mise.toml is up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git commit --quiet -m "Bump mise tools" -- mise.toml
+          git push --force origin "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --head "$BRANCH" --title "Bump mise tools" \
+              --body "$(git diff HEAD~1 -- mise.toml | sed -n 's/^[-+][a-z]/&/p')"
+          fi
+          # Token-made PR runs wait for approval; a dispatch runs Tests without it.
+          gh workflow run tests.yaml --ref "$BRANCH"

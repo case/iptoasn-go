@@ -103,7 +103,7 @@ func TestOpenFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("OpenFile failed: %v", err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	// Read a bit to confirm it works
 	buf := make([]byte, 100)

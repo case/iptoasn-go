@@ -7,20 +7,31 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    runs-on: ubuntu-24.04
+  ci:
+    name: CI
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
     steps:
       - name: Check out repo
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Go
-        uses: actions/setup-go@v6.4.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
 
-      - name: Build
-        run: go build ./...
+      - name: Install lint tools from mise.toml
+        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
 
-      - name: Test
-        run: go test ./... -v
+      - name: Run bin/ci
+        run: bin/ci

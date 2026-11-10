@@ -10,7 +10,7 @@ This is a utility for efficiently using the [iptoasn.com GeoIP data](https://ipt
 
 ## Misc
 
-Minimum Go version supported - `1.24` (as required by `maxmind/mmdbwriter`)
+Minimum Go version supported - `1.26`
 
 IPtoASN supported files:
 
@@ -19,6 +19,13 @@ IPtoASN supported files:
 - `ip2asn-v6.tsv.gz`
 - `ip2country-v4.tsv.gz`
 - `ip2country-v6.tsv.gz`
+
+## Development
+
+- `bin/setup` - runs `mise install` if mise is present, downloads Go modules, and checks for the lint tools pinned in `mise.toml`
+- `bin/lint` - runs `golangci-lint` (including `gofmt`), `jactionlint`, and `shellcheck`. Fix formatting with `golangci-lint fmt`
+- `bin/test` - runs the tests with the race detector
+- `bin/ci` - runs all of the above, as CI does
 
 ## Thank you 🙏
 

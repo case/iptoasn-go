@@ -66,7 +66,7 @@ func Download(urlStr string) (io.ReadCloser, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, fmt.Errorf("downloading %s: status %d", urlStr, resp.StatusCode)
 	}
 
@@ -82,7 +82,7 @@ func Download(urlStr string) (io.ReadCloser, error) {
 			}
 		}
 		if !valid {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return nil, fmt.Errorf("downloading %s: unexpected content type %q (expected gzip)", urlStr, contentType)
 		}
 	}
@@ -97,7 +97,7 @@ func Download(urlStr string) (io.ReadCloser, error) {
 	if strings.HasSuffix(urlStr, ".gz") {
 		gr, err := gzip.NewReader(resp.Body)
 		if err != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return nil, fmt.Errorf("creating gzip reader: %w", err)
 		}
 		return &gzipReadCloser{gr, resp.Body}, nil
@@ -119,7 +119,7 @@ func OpenFile(path string) (io.ReadCloser, error) {
 	if strings.HasSuffix(path, ".gz") {
 		gr, err := gzip.NewReader(f)
 		if err != nil {
-			f.Close()
+			_ = f.Close()
 			return nil, fmt.Errorf("creating gzip reader: %w", err)
 		}
 		return &gzipReadCloser{gr, f}, nil

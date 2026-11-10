@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Install project dependencies and check that the lint tools are available.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+missing=0
+need() {
+  if command -v "$1" >/dev/null 2>&1; then
+    echo "✓ $1"
+  else
+    echo "✗ $1 not found: $2"
+    missing=1
+  fi
+}
+
+if command -v mise >/dev/null 2>&1; then
+  mise install
+fi
+
+need go "install Go (version in go.mod) from https://go.dev/dl/"
+[ "$missing" -eq 0 ] || exit 1
+
+go mod download
+go mod verify
+
+for tool in golangci-lint jactionlint shellcheck; do
+  need "$tool" "install the version pinned in mise.toml"
+done
+exit "$missing"

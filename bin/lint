@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Run linters and formatting checks. Fix formatting with: golangci-lint fmt
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+golangci-lint run ./...
+jactionlint --profile default
+shellcheck bin/*
