@@ -1,5 +1,5 @@
 # Lint tools used by bin/lint. Go itself comes from go.mod.
 [tools]
 golangci-lint = "2.15.0"
-jactionlint = { version = "2.5.0", workflow = "release.yaml" }
+jactionlint = { version = "2.6.0", workflow = "release.yaml" }
 shellcheck = "0.11.0"
